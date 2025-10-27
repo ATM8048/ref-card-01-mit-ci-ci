@@ -35,10 +35,8 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/my-app
           tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=sha
-          normalize: true 
+            latest
+            master
 
       - name: Build and push
         uses: docker/build-push-action@v6
