@@ -33,7 +33,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ secrets.DOCKERHUB_USERNAME }}/my-app
+          images: ${{ secrets.DOCKERHUB_USERNAME }}
           tags: |
             latest
             master
