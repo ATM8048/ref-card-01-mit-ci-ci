@@ -38,6 +38,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha
+          normalize: true 
 
       - name: Build and push
         uses: docker/build-push-action@v6
