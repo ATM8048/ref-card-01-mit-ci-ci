@@ -69,35 +69,33 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # 9️⃣ Create new ECS task definition revision and deploy
+      # 9️⃣ Deploy to ECS
       - name: Deploy to ECS
         run: |
           echo "➡ Updating ECS task definition..."
-
-          # Lade die aktuelle Task-Definition
+          
+          # Neue Task-Definition nur mit gültigen Feldern laden
           aws ecs describe-task-definition \
             --task-definition ${{ secrets.ECS_TASK_FAMILY }} \
-            --query taskDefinition > task-def.json
+            --query "taskDefinition.{family:family, networkMode:networkMode, containerDefinitions:containerDefinitions, requiresCompatibilities:requiresCompatibilities, cpu:cpu, memory:memory, executionRoleArn:executionRoleArn, taskRoleArn:taskRoleArn}" \
+            --output json > task-def.json
 
-          # Neue Image-URL ersetzen
-          NEW_IMAGE="${{ secrets.CI_AWS_ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
+          # Neues Image einsetzen
+          NEW_IMAGE="${{ secrets.CI_AWS_ECR_REGISTRY }}/${{ secrets.CI_AWS_ECR_REPOSITORY_NAME }}:latest"
           echo "Using image: $NEW_IMAGE"
-
           jq ".containerDefinitions[0].image = \"$NEW_IMAGE\"" task-def.json > new-task-def.json
 
-          # Registriere eine neue Revision
+          # Neue Revision registrieren
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file://new-task-def.json \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
-
           echo "➡ New task definition: $TASK_DEF_ARN"
 
-          # Starte Deployment
+          # ECS Service aktualisieren
           aws ecs update-service \
             --cluster ${{ secrets.ECS_CLUSTER }} \
             --service ${{ secrets.ECS_SERVICE }} \
             --task-definition "$TASK_DEF_ARN"
 
           echo "🚀 ECS deployment started successfully."
-
