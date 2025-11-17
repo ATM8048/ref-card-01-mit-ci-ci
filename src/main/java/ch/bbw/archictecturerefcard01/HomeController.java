@@ -14,9 +14,9 @@ public class HomeController {
         Message message = new Message();
 
         try {
-            message.setText("IP Address (Server): " + InetAddress.getLocalHost().getHostAddress());
+            message.setText("Das ist der Test von Martin, neue Push. IP Address (Server): " + InetAddress.getLocalHost().getHostAddress());
         } catch(Exception e) {
-            message.setText("IP Address (Server): ---");
+            message.setText("IP Address (Server: Test): ---");
         }
 
         model.addAttribute("message", message.getText());
